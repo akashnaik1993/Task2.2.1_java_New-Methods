@@ -1,0 +1,101 @@
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class Solution {
+
+    /**
+     * 1) Calculate the sum of all prime numbers up to a given integer n.
+     *    Inclusive of n if n is prime.
+     *    Time complexity: ~O(n log log n) with sieve; O(n * sqrt(n)) with isPrime loop.
+     *    Below is an efficient Sieve of Eratosthenes version.
+     */
+    public int sumOfPrimes(int n) {
+        if (n < 2) return 0;
+
+        boolean[] isComposite = new boolean[n + 1];
+        int sum = 0;
+
+        for (int p = 2; p <= n; p++) {
+            if (!isComposite[p]) {
+                sum += p;
+                // mark multiples
+                if ((long)p * p <= n) {
+                    for (int m = p * p; m <= n; m += p) {
+                        isComposite[m] = true;
+                    }
+                }
+            }
+        }
+        return sum;
+    }
+
+    /**
+     * 2) Convert a string to title case (first letter of each word capitalized).
+     *    Words are split on whitespace. Non-alphabetic starts are preserved.
+     *    Examples:
+     *      "hello world" -> "Hello World"
+     *      "JAVA 101 basics" -> "Java 101 Basics"
+     */
+    public String toTitleCase(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        StringBuilder out = new StringBuilder(input.length());
+        boolean startOfWord = true;
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+
+            if (Character.isWhitespace(c)) {
+                out.append(c);
+                startOfWord = true;
+            } else {
+                if (startOfWord) {
+                    out.append(Character.toUpperCase(c));
+                    startOfWord = false;
+                } else {
+                    out.append(Character.toLowerCase(c));
+                }
+            }
+        }
+        return out.toString();
+    }
+
+    /**
+     * 3) Group anagrams together.
+     *    Input example: ["eat","tea","tan","ate","nat","bat"]
+     *    Output example (order can vary): [["bat"],["nat","tan"],["ate","eat","tea"]]
+     *    Approach: sort each word's characters to form a canonical key.
+     *    Time complexity: O(k * m log m), where k = number of words, m = avg length.
+     */
+    public List<List<String>> groupAnagrams(String[] strs) {
+        if (strs == null || strs.length == 0) return new ArrayList<>();
+
+        Map<String, List<String>> buckets = new HashMap<>();
+
+        for (String s : strs) {
+            char[] chars = s.toCharArray();
+            Arrays.sort(chars);
+            String key = new String(chars);
+            buckets.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+        }
+
+        return new ArrayList<>(buckets.values());
+    }
+
+    // --- Optional: quick manual test harness (won't be used by the grader) ---
+    public static void main(String[] args) {
+        Solution sol = new Solution();
+
+        System.out.println("sumOfPrimes(10) = " + sol.sumOfPrimes(10)); // 2+3+5+7 = 17
+
+        System.out.println(sol.toTitleCase("hello   WORLD\tjava"));
+        // -> "Hello   World\tJava"
+
+        String[] arr = {"eat","tea","tan","ate","nat","bat"};
+        List<List<String>> grouped = sol.groupAnagrams(arr);
+        // Print groups (order may vary)
+        System.out.println(grouped.stream()
+            .map(g -> g.toString())
+            .collect(Collectors.joining(" | ")));
+    }
+}
